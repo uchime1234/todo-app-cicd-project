@@ -54,22 +54,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Deploy to AWS EC2
+    - name: Deploy to AWS EC2 (Amazon Linux)
       uses: appleboy/ssh-action@v0.1.5
       with:
         host: ${{ secrets.AWS_HOST }}
-        username: ${{ secrets.AWS_USER }}
+        username: ec2-user  # ← CHANGED from 'ubuntu' to 'ec2-user'
         key: ${{ secrets.AWS_SSH_KEY }}
         script: |
-          echo "🚀 Starting deployment..."
+          echo "🚀 Starting deployment on Amazon Linux..."
           
           # Navigate to project directory
-          cd /home/ubuntu/my-django-ci-cd
+          cd /home/ec2-user/my-django-ci-cd  # ← CHANGED path
           
           # Pull latest code
           git pull origin main
           
-          # Activate virtual environment
+          # Activate virtual environment (Amazon Linux uses python3)
           source venv/bin/activate
           
           # Install/update dependencies
@@ -81,7 +81,7 @@ jobs:
           # Collect static files
           python manage.py collectstatic --noinput
           
-          # Create superuser if not exists (optional, remove in production)
+          # Create superuser if not exists
           echo "from django.contrib.auth.models import User; User.objects.filter(username='admin').exists() or User.objects.create_superuser('admin', 'admin@example.com', 'admin123')" | python manage.py shell || true
           
           # Restart services
